@@ -1,5 +1,5 @@
 /*全局*/
-* { font-family:"PingFang SC"; font-size:14px; }
+* { font-family:"PingFang SC","\5FAE\8F6F\96C5\9ED1","Microsoft Yahei",Arial,Helvetica,sans-serif,"\5B8B\4F53"; font-size:14px; }
 
 QPushButton:focus {
 padding: -1;
