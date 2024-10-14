@@ -1,0 +1,58 @@
+name: Static Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      qt_version:
+        default: 'Qt6.5.3-Windows-x86_64-MinGW13.2.0-ucrt-staticFull-20240527'
+        required: true
+        type: choice
+        description: 'qt_version'
+        options:
+          - Qt5.6.3-Windows-x86-MinGW4.9.4-staticFull-20200104
+          - Qt5.15.7-Windows-x86-MinGW8.1.0-staticFull-20221104
+          - Qt5.15.7-Windows-x86_64-MinGW8.1.0-staticFull-20221104
+          - Qt5.15.14-Windows-x86-MinGW8.1.0-staticFull-20240527
+          - Qt5.15.14-Windows-x86_64-MinGW8.1.0-staticFull-20240527
+          - Qt6.5.3-Windows-x86_64-MinGW13.2.0-ucrt-staticFull-20240527
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+
+      - name: Install Qt Static
+        uses: orestonce/install-qt@main
+        with:
+          version: ${{ inputs.qt_version }}
+
+      - name: qmake
+        run: qmake.exe OneKeyWord.pro -spec win32-g++
+        shell: bash
+
+      - name: mingw32-make
+        run: mingw32-make.exe
+        shell: bash
+
+      - name: mkdir build
+        run: mkdir build
+        shell: bash
+
+      - name: copy exe
+        run: cp release/OneKeyWord.exe build/
+        shell: bash
+
+#      - name: windeployqt
+#        run: windeployqt.exe build/OneKeyWord.exe
+#        shell: bash
+
+      - name: Archive APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: OneKeyWord
+          path: |
+            build/**
+          overwrite: true
+          compression-level: 9

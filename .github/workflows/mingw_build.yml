@@ -1,0 +1,72 @@
+name: MinGW Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      qt_version:
+        default: '6.8.0'
+        required: true
+        type: string
+        description: 'qt_version'
+      qt_arch:
+        default: 'win64_mingw'
+        required: true
+        type: string
+        description: 'qt_arch'
+      qt_tools:
+        default: 'tools_mingw1310'
+        required: true
+        type: string
+        description: 'qt_tools'
+      qt_modules:
+        default: 'qtactiveqt'
+        required: true
+        type: string
+        description: 'qt_modules'
+
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          host: 'windows'
+          target: 'desktop'
+          modules: ${{ inputs.qt_modules }}
+          version: ${{ inputs.qt_version }}
+          arch: ${{ inputs.qt_arch }}
+          tools: ${{ inputs.qt_tools }}
+
+      - name: qmake
+        run: qmake.exe OneKeyWord.pro -spec win32-g++
+        shell: bash
+
+      - name: mingw32-make
+        run: mingw32-make.exe
+        shell: bash
+
+      - name: mkdir build
+        run: mkdir build
+        shell: bash
+
+      - name: copy exe
+        run: cp release/OneKeyWord.exe build/
+        shell: bash
+
+      - name: windeployqt
+        run: windeployqt.exe build/OneKeyWord.exe
+        shell: bash
+
+      - name: Archive APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: OneKeyWord
+          path: |
+            build/**
+          overwrite: true
+          compression-level: 9

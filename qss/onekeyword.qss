@@ -1,0 +1,33 @@
+/*全局*/
+* { font-family:"PingFang SC"; font-size:14px; }
+
+QPushButton:focus {
+padding: -1;
+}
+
+QMenu {
+background-color: white;
+margin: 2px; /* some spacing around the menu */
+}
+
+QMenu::item {
+padding: 2px 25px 2px 20px;
+border: 1px solid transparent; /* reserve space for selection border */
+}
+
+QMenu::item:selected {
+border-color: darkblue;
+background: rgba(100, 100, 100, 150);
+}
+
+QMenu::separator {
+height: 2px;
+background: #eee;
+margin-left: 10px;
+margin-right: 5px;
+}
+
+QMenu::indicator {
+width: 13px;
+height: 13px;
+}

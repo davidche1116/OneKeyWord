@@ -1,0 +1,77 @@
+name: MS Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      qt_version:
+        default: '6.8.0'
+        required: true
+        type: string
+        description: 'qt_version'
+      qt_arch:
+        default: 'win64_msvc2022_64'
+        required: true
+        type: string
+        description: 'qt_arch'
+      qt_tools:
+        default: 'tools_vcredist,qt.tools.vcredist_64 tools_cmake,qt.tools.cmake'
+        required: true
+        type: string
+        description: 'qt_tools'
+      qt_modules:
+        default: 'qtactiveqt'
+        required: true
+        type: string
+        description: 'qt_modules'
+
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v2
+        with:
+          msbuild-architecture: x64
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          host: 'windows'
+          target: 'desktop'
+          modules: ${{ inputs.qt_modules }}
+          version: ${{ inputs.qt_version }}
+          arch: ${{ inputs.qt_arch }}
+          tools: ${{ inputs.qt_tools }}
+
+#      - name: qmake
+#        run: qmake.exe OneKeyWord.pro
+#        shell: bash
+
+      - name: qmake2cmake
+        shell: bash
+        run: |
+          python -m pip install qmake2cmake
+          qmake2cmake OneKeyWord.pro --min-qt-version 6.8
+          mkdir build
+          cmake . && cmake --build . --verbose --config Release
+
+      - name: copy exe
+        run: cp Release/OneKeyWord.exe build/
+        shell: bash
+
+      - name: windeployqt
+        run: windeployqt.exe build/OneKeyWord.exe
+        shell: bash
+
+      - name: Archive APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: OneKeyWord
+          path: |
+            build/**
+          overwrite: true
+          compression-level: 9
