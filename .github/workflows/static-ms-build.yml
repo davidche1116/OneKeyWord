@@ -1,0 +1,41 @@
+name: Static MS Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+
+      - name: Install Qt Static
+        uses: AllanChain/install-qt-static@v6.8.2-1
+
+      - name: qmake2cmake
+        shell: bash
+        run: |
+          python -m pip install qmake2cmake
+          qmake2cmake OneKeyWord.pro --min-qt-version 6.8
+          mkdir build
+          qt-cmake .
+          cmake . && cmake --build . --verbose --config Release
+
+      - name: copy exe
+        run: cp Release/OneKeyWord.exe build/
+        shell: bash
+
+      - name: windeployqt
+        run: windeployqt.exe build/OneKeyWord.exe
+        shell: bash
+
+      - name: Archive APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: OneKeyWord
+          path: |
+            build/**
+          overwrite: true
+          compression-level: 9
+          retention-days: 3
